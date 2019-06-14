@@ -1,7 +1,6 @@
 package ar.bipsucursales.legacybuilder.model;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
