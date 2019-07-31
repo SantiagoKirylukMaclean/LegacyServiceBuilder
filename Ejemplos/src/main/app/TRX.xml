@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mf="http://www.mulesoft.org/schema/mule/mf" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:trama="http://www.mulesoft.org/schema/mule/trama" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.mulesoft.org/schema/mule/trama http://www.mulesoft.org/schema/mule/trama/current/mule-trama.xsd http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.mulesoft.org/schema/mule/mf http://www.mulesoft.org/schema/mule/mf/current/mule-mf.xsd http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+   <mf:config name="MF_CONFIGURACION_GENERAL" doc:name="MF: Configuracion" autorization="55031;4006;000002584;10521;1644;000000644:00413;00415;675;406" />
+   <ws:consumer-config name="WEB_SERVICE_CONSUMER_$varAppName$" service="$varOperationName$Service" port="$varOperationName$Port" serviceAddress="${sur.protocol}://${sur.host}:${sur.port}${sur.basePath}/$varAppName$" wsdlLocation="wsdl/$varAppName$.wsdl" doc:name="Web Service Consumer $varAppName$" connectorConfig="MF_HTTPS_Request_Configuration" />
+   <flow name="FLOW_$varAppName$">
+      <http:listener config-ref="HTTP_LISTENER_GENERAL" path="/$varAppName$" doc:name="$varAppName$" />
+      <mf:json-to-trama config-ref="MF_CONFIGURACION_GENERAL" mensaje="#[payload]" nombreTransaccion="$varAppName$" carpetaArchivo="${app.home}/classes/MF/" doc:name="MF Json To Trama" />
+      <logger message="message.id: #[message.id] / IP Process: #[message.inboundProperties.'http.remote.address'] / messageIdProcess: #[message.inboundProperties.'messageIdProcess'] / REQUEST HOST: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger" />
+      <dw:transform-message doc:name="TramaToSOAP">
+         <dw:input-payload mimeType="application/java" />
+         <dw:set-payload><![CDATA[%dw 1.0 
+%output application/xml
+%namespace ns0 http://www.$varOperationName$.COPY$varStackSize$.Request.com
+---
+{
+	ns0#$varOperationName$Operation: {
+		ns0#reg_$varStackSize$: {
+			ns0#datos: payload
+		}
+	}
+}]]></dw:set-payload>
+      </dw:transform-message>
+      <set-property propertyName="MULE_ENCODING" value="UTF-8" doc:name="Property" />
+      <ws:consumer config-ref="WEB_SERVICE_CONSUMER_$varAppName$" operation="$varOperationName$Operation" doc:name="Web Service Consumer $varAppName$" />
+      <dw:transform-message doc:name="SOAPToTrama">
+         <dw:input-payload mimeType="application/xml" />
+         <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 http://www.$varOperationName$.COPY$varStackSize$.Response.com
+---
+payload.ns0#$varOperationName$OperationResponse.ns0#reg_$varStackSize$.ns0#datos]]></dw:set-payload>
+      </dw:transform-message>
+      <logger message="message.id: #[message.id] / RESPONSE HOST: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger" />
+      <mf:trama-to-json config-ref="MF_CONFIGURACION_GENERAL" mensaje="#[payload]" carpetaArchivo="${app.home}/classes/MF/" doc:name="MF Trama 2 Json" />
+      <set-property propertyName="messageIdLegcy" value="#[message.id]" doc:name="Property" />
+      <set-property propertyName="ipLegacy" value="#[server.ip]" doc:name="Property" />
+      <json:object-to-json-transformer encoding="ISO-8859-1" mimeType="application/json" doc:name="Object to JSON" />
+   </flow>
+</mule>

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Request {
+public class JsonFile {
 	
 	private String name;
 	private HashMap<String,Object>  fields;
@@ -22,14 +22,9 @@ public class Request {
 	public void setFields(HashMap<String, Object> fields) {
 		this.fields = fields;
 	}
-	public Request(@JsonProperty("name") String name, @JsonProperty("fields") HashMap<String,Object> fields) {
+	public JsonFile(@JsonProperty("name") String name, @JsonProperty("fields") HashMap<String,Object> fields) {
 		super();
 		this.name = name;
 		this.fields = fields;
 	}
-	
-	
-	
-	
-
 }

@@ -9,7 +9,8 @@ public class LegacyOrder {
 	private String transaction;
 	private String operation;
 	private int stackSize;
-	private List<Request> requests;
+	private List<JsonFile> requests;
+	private List<JsonFile> responses;
 
 	public String getTransaction() {
 		return transaction;
@@ -35,21 +36,31 @@ public class LegacyOrder {
 		this.stackSize = stackSize;
 	}
 
-	public List<Request> getRequests() {
+	public List<JsonFile> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(List<Request> requests) {
+	public void setRequests(List<JsonFile> requests) {
 		this.requests = requests;
 	}
 
+	public List<JsonFile> getResponses() {
+		return responses;
+	}
+
+	public void setResponses(List<JsonFile> responses) {
+		this.responses = responses;
+	}
+
 	public LegacyOrder(@JsonProperty("transaction") String transaction, @JsonProperty("operation") String operation,
-			@JsonProperty("stackSize") int stackSize, @JsonProperty("requests") List<Request> requests) {
+			@JsonProperty("stackSize") int stackSize, @JsonProperty("requests") List<JsonFile> requests,
+			@JsonProperty("responses") List<JsonFile> responses) {
 		super();
 		this.transaction = transaction;
 		this.operation = operation;
 		this.stackSize = stackSize;
 		this.requests = requests;
+		this.responses = responses;
 	}
 
 }
