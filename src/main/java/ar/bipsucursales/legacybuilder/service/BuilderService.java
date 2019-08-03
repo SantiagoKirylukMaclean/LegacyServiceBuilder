@@ -7,6 +7,6 @@ import ar.bipsucursales.legacybuilder.model.LegacyOrder;
 @Service
 public interface BuilderService {
 	
-	public void createLegacyService(LegacyOrder legacyOrder);
+	void createLegacyService(LegacyOrder legacyOrder);
 
 }
